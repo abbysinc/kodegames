@@ -66,26 +66,6 @@ body{
   100%{ transform:translate(0); }
 }
 
-.login-box h2{ color:red; text-align:center; margin-bottom:15px; }
-
-.login-box input{
-  width:100%;
-  padding:8px;
-  margin-bottom:10px;
-  background:black;
-  color:#00ff00;
-  border:1px solid #00ff00;
-}
-
-.login-box button{
-  width:100%;
-  padding:10px;
-  background:red;
-  color:white;
-  border:none;
-  cursor:pointer;
-}
-
 #error{ color:red; text-align:center; display:none; }
 
 #main{
@@ -147,10 +127,10 @@ textarea{
 
 <div id="login" class="screen">
   <div class="login-box">
-    <h2>ACCESO RESTRINGIDO</h2>
+    <h2 style="color:red">ACCESO RESTRINGIDO</h2>
     <input id="user" placeholder="USUARIO">
     <input id="pass" type="password" placeholder="CONTRASEÑA">
-    <button onclick="loginUser()">ENTRAR</button>
+    <button id="loginBtn">ENTRAR</button>
     <div id="error">USUARIO NO AUTORIZADO</div>
   </div>
 </div>
@@ -161,7 +141,7 @@ textarea{
   <div class="panel">
     <button id="powerBtn">ENCENDER PERSONAJE</button>
     <textarea id="textInput" placeholder="Escribí el mensaje..."></textarea>
-    <button onclick="sendText()">TEXTO</button>
+    <button id="sendBtn">TEXTO</button>
   </div>
 
   <div id="dialog"></div>
@@ -171,7 +151,7 @@ textarea{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-/* 🔐 TU FIREBASE */
+/* 🔐 FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyBP-twUwMdVbG-SKWsWCxzssROI64bzkdI",
   authDomain: "kodegames-6df40.firebaseapp.com",
@@ -179,60 +159,74 @@ const firebaseConfig = {
   projectId: "kodegames-6df40",
   storageBucket: "kodegames-6df40.firebasestorage.app",
   messagingSenderId: "394434413800",
-  appId: "1:394434413800:web:053531e404f1396f09b55d",
-  measurementId: "G-J8R3GT190D"
+  appId: "1:394434413800:web:053531e404f1396f09b55d"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const estadoRef = ref(db, "estado");
 
-/* NAVEGACIÓN */
+/* DOM */
+const btnJ = document.getElementById("btnJ");
 const home = document.getElementById("home");
 const login = document.getElementById("login");
 const main = document.getElementById("main");
-btnJ.onclick = ()=>{
+
+const user = document.getElementById("user");
+const pass = document.getElementById("pass");
+const error = document.getElementById("error");
+const loginBtn = document.getElementById("loginBtn");
+
+const powerBtn = document.getElementById("powerBtn");
+const character = document.getElementById("character");
+const dialog = document.getElementById("dialog");
+const textInput = document.getElementById("textInput");
+const sendBtn = document.getElementById("sendBtn");
+
+/* NAVEGACIÓN */
+btnJ.onclick = () => {
   home.classList.remove("active");
   login.classList.add("active");
 };
 
-/* LOGIN LOCAL */
+/* LOGIN */
 const USERS = { admin:"404", jota:"pollo", beta:"game", dark:"pixel" };
-window.loginUser = ()=>{
-  const u = user.value, p = pass.value;
-  if(USERS[u] === p){
+
+loginBtn.onclick = () => {
+  if (USERS[user.value] === pass.value) {
     login.classList.remove("active");
     main.classList.add("active");
-    error.style.display="none";
-  }else error.style.display="block";
+    error.style.display = "none";
+  } else {
+    error.style.display = "block";
+  }
 };
 
 /* TIEMPO REAL */
-onValue(estadoRef, snap=>{
+onValue(estadoRef, snap => {
   const d = snap.val();
   if(!d) return;
 
   if(d.encendido){
     powerBtn.classList.add("on");
-    powerBtn.textContent="PERSONAJE ACTIVO";
-    character.style.backgroundImage='url("pollo/personaje/encender_1.gif")';
-    main.style.backgroundImage='url("pollo/fondos/fondo_activado.png")';
-  }else{
+    powerBtn.textContent = "PERSONAJE ACTIVO";
+    character.style.backgroundImage = 'url("pollo/personaje/encender_1.gif")';
+  } else {
     powerBtn.classList.remove("on");
-    powerBtn.textContent="ENCENDER PERSONAJE";
-    character.style.backgroundImage='url("pollo/personaje/idle.png")';
+    powerBtn.textContent = "ENCENDER PERSONAJE";
+    character.style.backgroundImage = 'url("pollo/personaje/idle.png")';
   }
 
   dialog.textContent = d.texto || "";
-};
+});
 
 /* ACCIONES */
-powerBtn.onclick = ()=>{
-  set(estadoRef,{ encendido:true, texto:"" });
+powerBtn.onclick = () => {
+  set(estadoRef, { encendido:true, texto:"" });
 };
 
-window.sendText = ()=>{
-  set(estadoRef,{ encendido:true, texto:textInput.value });
+sendBtn.onclick = () => {
+  set(estadoRef, { encendido:true, texto:textInput.value });
 };
 </script>
 

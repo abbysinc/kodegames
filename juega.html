@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mansión – Kode Games</title>
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; font-family:'Courier New', monospace; }
+
+body{
+  width:100vw;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* JUEGO */
+#game{
+  width:100%;
+  height:100%;
+  background:url("pollo/fondos/fondo1.png") center/cover no-repeat;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+}
+
+/* PERSONAJE */
+#character{
+  width:256px;
+  height:256px;
+  background:url("pollo/personaje/idle.png") center/contain no-repeat;
+}
+
+/* PANEL */
+#panel{
+  position:absolute;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:10px;
+}
+
+button{
+  padding:10px 20px;
+  background:#222;
+  color:white;
+  border:2px solid white;
+  cursor:pointer;
+}
+
+button.on{ background:green; }
+
+textarea{
+  width:300px;
+  height:60px;
+  background:black;
+  color:#00ff00;
+  border:2px solid #00ff00;
+}
+
+/* LOGIN OVERLAY */
+#login{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.9);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:10;
+}
+
+#login.active{ display:flex; }
+
+.login-box{
+  background:black;
+  border:3px solid red;
+  padding:20px;
+  width:300px;
+}
+
+/* BOTÓN CIRCULAR */
+#loginOrb{
+  position:absolute;
+  top:20px;
+  right:20px;
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:#00ff00;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:24px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+  <div id="loginOrb">🔒</div>
+
+  <div id="character"></div>
+
+  <div id="panel">
+    <button id="powerBtn">ENCENDER</button>
+    <textarea id="textInput" placeholder="Mensaje..."></textarea>
+    <button id="sendBtn">TEXTO</button>
+  </div>
+</div>
+
+<div id="login">
+  <div class="login-box">
+    <h3 style="color:red">LOGIN</h3>
+    <input placeholder="Usuario"><br><br>
+    <input type="password" placeholder="Clave"><br><br>
+    <button onclick="closeLogin()">ENTRAR</button>
+  </div>
+</div>
+
+<script>
+const powerBtn = document.getElementById("powerBtn");
+const character = document.getElementById("character");
+const login = document.getElementById("login");
+
+powerBtn.onclick = ()=>{
+  powerBtn.classList.toggle("on");
+  character.style.backgroundImage =
+    powerBtn.classList.contains("on")
+    ? 'url("pollo/personaje/encender_1.gif")'
+    : 'url("pollo/personaje/idle.png")';
+};
+
+loginOrb.onclick = ()=> login.classList.add("active");
+function closeLogin(){ login.classList.remove("active"); }
+</script>
+
+</body>
+</html>

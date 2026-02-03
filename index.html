@@ -32,7 +32,6 @@ body{
 
 .active{ display:flex; }
 
-/* HOME */
 #home{
   background:url("pollo/fondos/fondo1.png") center/cover no-repeat;
 }
@@ -46,7 +45,6 @@ body{
   cursor:pointer;
 }
 
-/* LOGIN */
 #login{
   background:url("pollo/fondos/fondo_login.png") center/cover no-repeat;
 }
@@ -68,11 +66,7 @@ body{
   100%{ transform:translate(0); }
 }
 
-.login-box h2{
-  color:red;
-  text-align:center;
-  margin-bottom:15px;
-}
+.login-box h2{ color:red; text-align:center; margin-bottom:15px; }
 
 .login-box input{
   width:100%;
@@ -92,14 +86,8 @@ body{
   cursor:pointer;
 }
 
-#error{
-  color:red;
-  text-align:center;
-  margin-top:10px;
-  display:none;
-}
+#error{ color:red; text-align:center; display:none; }
 
-/* MAIN */
 #main{
   background:url("pollo/fondos/fondo1.png") center/cover no-repeat;
   flex-direction:row;
@@ -112,10 +100,7 @@ body{
   background:url("pollo/personaje/idle.png") center/contain no-repeat;
 }
 
-.panel{
-  margin-left:20px;
-  color:white;
-}
+.panel{ margin-left:20px; color:white; }
 
 .panel button{
   margin-top:10px;
@@ -127,9 +112,7 @@ body{
   cursor:pointer;
 }
 
-.panel button.on{
-  background:green;
-}
+.panel button.on{ background:green; }
 
 textarea{
   margin-top:10px;
@@ -158,12 +141,10 @@ textarea{
 
 <body>
 
-<!-- HOME -->
 <div id="home" class="screen active">
   <button id="btnJ">J</button>
 </div>
 
-<!-- LOGIN -->
 <div id="login" class="screen">
   <div class="login-box">
     <h2>ACCESO RESTRINGIDO</h2>
@@ -174,98 +155,85 @@ textarea{
   </div>
 </div>
 
-<!-- MAIN -->
 <div id="main" class="screen">
   <div id="character"></div>
 
   <div class="panel">
     <button id="powerBtn">ENCENDER PERSONAJE</button>
     <textarea id="textInput" placeholder="Escribí el mensaje..."></textarea>
-    <button onclick="showText()">TEXTO</button>
+    <button onclick="sendText()">TEXTO</button>
   </div>
 
   <div id="dialog"></div>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+/* 🔐 TU FIREBASE */
+const firebaseConfig = {
+  apiKey: "AIzaSyBP-twUwMdVbG-SKWsWCxzssROI64bzkdI",
+  authDomain: "kodegames-6df40.firebaseapp.com",
+  databaseURL: "https://kodegames-6df40-default-rtdb.firebaseio.com",
+  projectId: "kodegames-6df40",
+  storageBucket: "kodegames-6df40.firebasestorage.app",
+  messagingSenderId: "394434413800",
+  appId: "1:394434413800:web:053531e404f1396f09b55d",
+  measurementId: "G-J8R3GT190D"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const estadoRef = ref(db, "estado");
+
 /* NAVEGACIÓN */
 const home = document.getElementById("home");
 const login = document.getElementById("login");
 const main = document.getElementById("main");
-
-document.getElementById("btnJ").onclick = ()=>{
+btnJ.onclick = ()=>{
   home.classList.remove("active");
   login.classList.add("active");
 };
 
-/* USUARIOS Y CONTRASEÑAS */
-const USERS = {
-  "admin": "404",
-  "jota": "pollo",
-  "beta": "game",
-  "dark": "pixel"
-};
-
-function loginUser(){
-  const u = document.getElementById("user").value;
-  const p = document.getElementById("pass").value;
-  const error = document.getElementById("error");
-
+/* LOGIN LOCAL */
+const USERS = { admin:"404", jota:"pollo", beta:"game", dark:"pixel" };
+window.loginUser = ()=>{
+  const u = user.value, p = pass.value;
   if(USERS[u] === p){
     login.classList.remove("active");
     main.classList.add("active");
-    error.style.display = "none";
-  }else{
-    error.style.display = "block";
-  }
-}
-
-/* PERSONAJE */
-const powerBtn = document.getElementById("powerBtn");
-const character = document.getElementById("character");
-let encendido = false;
-
-powerBtn.onclick = ()=>{
-  encendido = !encendido;
-  if(encendido){
-    powerBtn.classList.add("on");
-    powerBtn.textContent = "PERSONAJE ACTIVO";
-    character.style.backgroundImage =
-      'url("pollo/personaje/encender_1.png")';
-    main.style.backgroundImage =
-      'url("pollo/fondos/fondo_activado.png")';
-  }else{
-    powerBtn.classList.remove("on");
-    powerBtn.textContent = "ENCENDER PERSONAJE";
-    character.style.backgroundImage =
-      'url("pollo/personaje/idle.png")';
-  }
+    error.style.display="none";
+  }else error.style.display="block";
 };
 
-/* TEXTO + VOZ */
-function showText(){
-  if(!encendido) return;
+/* TIEMPO REAL */
+onValue(estadoRef, snap=>{
+  const d = snap.val();
+  if(!d) return;
 
-  const text = document.getElementById("textInput").value;
-  const dialog = document.getElementById("dialog");
-  dialog.textContent = "";
-  let i = 0;
+  if(d.encendido){
+    powerBtn.classList.add("on");
+    powerBtn.textContent="PERSONAJE ACTIVO";
+    character.style.backgroundImage='url("pollo/personaje/encender_1.gif")';
+    main.style.backgroundImage='url("pollo/fondos/fondo_activado.png")';
+  }else{
+    powerBtn.classList.remove("on");
+    powerBtn.textContent="ENCENDER PERSONAJE";
+    character.style.backgroundImage='url("pollo/personaje/idle.png")';
+  }
 
-  speechSynthesis.cancel();
-  const voice = new SpeechSynthesisUtterance(text);
-  voice.lang = "es-ES";
-  voice.rate = 0.85;
-  speechSynthesis.speak(voice);
+  dialog.textContent = d.texto || "";
+};
 
-  const typing = setInterval(()=>{
-    if(i < text.length){
-      dialog.textContent += text[i];
-      i++;
-    }else{
-      clearInterval(typing);
-    }
-  },45);
-}
+/* ACCIONES */
+powerBtn.onclick = ()=>{
+  set(estadoRef,{ encendido:true, texto:"" });
+};
+
+window.sendText = ()=>{
+  set(estadoRef,{ encendido:true, texto:textInput.value });
+};
 </script>
 
 </body>
